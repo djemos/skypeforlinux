@@ -1,0 +1,34 @@
+#Packager: Dimitris Tzemos <dijemos@gmail.com>
+
+pkgname=skypeforlinux   
+pkgver=${pkgver:-$(wget -qO- https://repo.skype.com/deb/pool/main/s/skypeforlinux/|
+	grep skypeforlinux | grep -Eoi '<a [^>]+>'|grep -Eo 'href="[^\"]+"'|
+	sed "s/href=//"|
+	awk -F'[_]' '{print $2}'|
+	sort -r $1 | head -n1 )}
+pkgrel=1dj
+arch=x86_64
+source=("https://repo.skype.com/deb/pool/main/s/skypeforlinux/skypeforlinux_${pkgver}_amd64.deb")
+url="http://www.skype.com"
+
+slackdesc=\
+(
+#|-----handy-ruler------------------------------------------------------|
+"Skype (Skype for Linux WebRTC Beta)"
+"Skype is a peer-to-peer Internet telephony network. It competes"
+"against existing open VoIP protocols such as SIP, IAX, and H.323."
+)
+
+
+build() {
+	
+	cd "${SRC}"
+	ar x skypeforlinux_${pkgver}_amd64.deb || return 1
+	tar -xJC "${PKG}" -f data.tar.xz || return 1
+	rm data.tar.xz control.tar.gz || return 1
+	install -d "${PKG}/usr/share/licenses/skypeforlinux" || return 1
+	#mv "${PKG}/usr/share/skypeforlinux/LICENSE" "${PKG}/usr/share/licenses/skypeforlinux/" || return 1
+	mv "${PKG}/usr/share/skypeforlinux/LICENSES.chromium.html" "${PKG}/usr/share/licenses/skypeforlinux/" || return 1
+	rm -rf "${PKG}/opt" || return 1
+} 
+z
