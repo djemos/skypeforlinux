@@ -6,6 +6,7 @@ pkgver=${pkgver:-$(wget -qO- https://repo.skype.com/deb/pool/main/s/skypeforlinu
 	sed "s/href=//"|
 	awk -F'[_]' '{print $2}'|
 	sort -r $1 | head -n1 )}
+#pkgver=8.60.76.12	
 pkgrel=1dj
 arch=x86_64
 source=("https://repo.skype.com/deb/pool/main/s/skypeforlinux/skypeforlinux_${pkgver}_amd64.deb")
