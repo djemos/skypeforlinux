@@ -32,4 +32,3 @@ build() {
 	mv "${PKG}/usr/share/skypeforlinux/LICENSES.chromium.html" "${PKG}/usr/share/licenses/skypeforlinux/" || return 1
 	rm -rf "${PKG}/opt" || return 1
 } 
-z
