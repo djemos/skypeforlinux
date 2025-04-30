@@ -1,34 +1,40 @@
 #Packager: Dimitris Tzemos <dijemos@gmail.com>
 
-pkgname=skypeforlinux   
-pkgver=${pkgver:-$(wget -qO- https://repo.skype.com/deb/pool/main/s/skypeforlinux/|
-	grep skypeforlinux | grep -Eoi '<a [^>]+>'|grep -Eo 'href="[^\"]+"'|
-	sed "s/href=//"|
-	awk -F'[_]' '{print $2}'|
-	sort -r $1 | head -n1 )}
-#pkgver=8.60.76.12	
+pkgname=skypeforlinux
+pkgver=8.138.0.213
 pkgrel=1dj
 arch=x86_64
-source=("https://repo.skype.com/deb/pool/main/s/skypeforlinux/skypeforlinux_${pkgver}_amd64.deb")
+source=("https://api.snapcraft.io/api/v1/snaps/download/QRDEfjn4WJYnm0FzDKwqqRZZI77awQEV_392.snap")
 url="http://www.skype.com"
 
 slackdesc=\
 (
 #|-----handy-ruler------------------------------------------------------|
-"Skype (Skype for Linux WebRTC Beta)"
-"Skype is a peer-to-peer Internet telephony network. It competes"
-"against existing open VoIP protocols such as SIP, IAX, and H.323."
+"Skype is an instant messaging app that provides online text message"
+"and video chat services. Users may transmit both text and video"
+"messages and may exchange digital documents such as images, text, and"
+"video. Skype allows video conference calls."
+""
+"Homepage: https://www.skype.com/"
 )
 
 
 build() {
-	
+	# Snap package details:
+	# curl -sH 'Snap-Device-Series: 16' http://api.snapcraft.io/v2/snaps/info/skype | jq
+	SNAP_ID=QRDEfjn4WJYnm0FzDKwqqRZZI77awQEV
+	SNAP_REVISION=${SNAP_REVISION:-392}
 	cd "${SRC}"
-	ar x skypeforlinux_${pkgver}_amd64.deb || return 1
-	tar -xJC "${PKG}" -f data.tar.xz || return 1
-	rm data.tar.xz control.tar.gz || return 1
-	install -d "${PKG}/usr/share/licenses/skypeforlinux" || return 1
-	#mv "${PKG}/usr/share/skypeforlinux/LICENSE" "${PKG}/usr/share/licenses/skypeforlinux/" || return 1
-	mv "${PKG}/usr/share/skypeforlinux/LICENSES.chromium.html" "${PKG}/usr/share/licenses/skypeforlinux/" || return 1
-	rm -rf "${PKG}/opt" || return 1
-} 
+	unsquashfs -d . -f -no -q $SRC/${SNAP_ID}_${SNAP_REVISION}.snap \
+	meta/gui usr/share/{,doc}/$pkgname
+
+	mkdir -p $PKG/usr/{bin,share/{applications,pixmaps}}
+	mv usr/share/$pkgname $PKG/usr/share/
+	for i in $pkgname skype ; do ln -s ../share/$pkgname/$pkgname $PKG/usr/bin/$i ; done
+	mv meta/gui/$pkgname.png $PKG/usr/share/pixmaps/
+
+	for i in $pkgname{,-share} ; do
+		sed 's|\${SNAP}/meta/gui|/usr/share/pixmaps|' meta/gui/${i}.desktop > \
+		$PKG/usr/share/applications/${i}.desktop
+	done
+}
